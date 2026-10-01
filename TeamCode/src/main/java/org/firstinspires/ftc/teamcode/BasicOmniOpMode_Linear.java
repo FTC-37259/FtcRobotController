@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -74,6 +75,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
     private DcMotor frontRightDrive = null;
     private DcMotor backRightDrive = null;
 
+    private DcMotor baconIntakeMotor = null;
+
     @Override
     public void runOpMode() {
 
@@ -83,7 +86,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "back_left_drive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         backRightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
-
+        baconIntakeMotor = hardwareMap.get(DcMotor.class,"bacon_front_intake" );
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -98,6 +101,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        baconIntakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -158,10 +162,24 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             backLeftDrive.setPower(backLeftPower);
             backRightDrive.setPower(backRightPower);
 
+            //new section bacon_intake
+            //raad state of bacon_lb
+            boolean baconIntakeInput = gamepad2.left_bumper;
+            double baconIntakeMotorPower = 0;
+            //If pressed, then track the power of BaconLB (1 or 0)
+            if (baconIntakeInput == true) {
+                baconIntakeMotorPower = 1;
+            } else {
+                baconIntakeMotorPower = 0;
+            }
+            //Send to BaconInputMotor
+            baconIntakeMotor.setPower(baconIntakeMotorPower);
+
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
+            telemetry.addData("Intake ballintakething", "%4.2f" , baconIntakeMotorPower );
             telemetry.update();
         }
     }}
