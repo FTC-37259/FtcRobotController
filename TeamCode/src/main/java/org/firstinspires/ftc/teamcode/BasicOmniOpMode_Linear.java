@@ -77,6 +77,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
 
     private DcMotor baconIntakeMotor = null;
 
+    private DcMotor baconShooterMotor = null;
+
     @Override
     public void runOpMode() {
 
@@ -87,6 +89,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         backRightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
         baconIntakeMotor = hardwareMap.get(DcMotor.class,"bacon_front_intake" );
+        baconShooterMotor = hardwareMap.get(DcMotor.class,"bacon_shooter");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -102,6 +105,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
         baconIntakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        baconShooterMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -175,11 +179,23 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             //Send to BaconInputMotor
             baconIntakeMotor.setPower(baconIntakeMotorPower);
 
+            boolean baconShooterInput = gamepad2.right_bumper;
+            double baconShooterMotorPower = 0;
+            //If pressed, then track the power of BaconRB (1 or 0)
+            if (baconShooterInput == true) {
+                baconShooterMotorPower = 1;
+            } else {
+                baconShooterMotorPower = 0;
+            }
+            //Send to BaconInputMotor
+            baconShooterMotor.setPower(baconShooterMotorPower);
+
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
             telemetry.addData("Intake ballintakething", "%4.2f" , baconIntakeMotorPower );
+            telemetry.addData("Shoot ball thing", "%4.2f" , baconShooterMotorPower );
             telemetry.update();
         }
     }}
