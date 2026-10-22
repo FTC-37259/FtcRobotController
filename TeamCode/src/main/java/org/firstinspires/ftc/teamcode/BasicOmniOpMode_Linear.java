@@ -35,6 +35,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.CRServo;
+
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -78,6 +80,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
     private DcMotor baconIntakeMotor = null;
 
     private DcMotor baconShooterMotor = null;
+    private CRServo baconRotatorServo= null;
 
     @Override
     public void runOpMode() {
@@ -90,6 +93,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         backRightDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
         baconIntakeMotor = hardwareMap.get(DcMotor.class,"bacon_front_intake" );
         baconShooterMotor = hardwareMap.get(DcMotor.class,"bacon_shooter");
+        baconRotatorServo = hardwareMap.get(CRServo.class, "bacon_intake_servo");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -190,12 +194,29 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             //Send to BaconInputMotor
             baconShooterMotor.setPower(baconShooterMotorPower);
 
+            //send power to bacon rotator
+            boolean baconRotator = gamepad2.a;
+            boolean baconRotatorReverse = gamepad2.b;
+            double baconRotatorPower = 0;
+            //If pressed, then track the power of BaconRB (1 or 0)
+            if (baconRotator == true) {
+                baconRotatorPower = 1;
+            } else if (baconRotatorReverse == true) {
+                baconRotatorPower = -1;
+            } else {
+                baconRotatorPower = 0;
+            }
+            //Send to BaconInputMotor
+            baconRotatorServo.setPower(baconRotatorPower);
+
+
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
             telemetry.addData("Intake ballintakething", "%4.2f" , baconIntakeMotorPower );
             telemetry.addData("Shoot ball thing", "%4.2f" , baconShooterMotorPower );
+            telemetry.addData("Rotator power", "%4.2f" , baconRotatorPower );
             telemetry.update();
         }
     }}
