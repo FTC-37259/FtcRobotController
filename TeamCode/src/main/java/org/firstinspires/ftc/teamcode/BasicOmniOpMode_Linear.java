@@ -108,7 +108,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        baconIntakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        baconIntakeMotor.setDirection(DcMotor.Direction.REVERSE);
         baconShooterMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
@@ -173,10 +173,13 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             //new section bacon_intake
             //raad state of bacon_lb
             boolean baconIntakeInput = gamepad2.left_bumper;
+            float baconIntakeReverseInput = gamepad2.left_trigger;
             double baconIntakeMotorPower = 0;
             //If pressed, then track the power of BaconLB (1 or 0)
             if (baconIntakeInput == true) {
                 baconIntakeMotorPower = 1;
+            } else if (baconIntakeReverseInput>0.5) {
+                baconIntakeMotorPower= -1;
             } else {
                 baconIntakeMotorPower = 0;
             }
