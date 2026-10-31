@@ -118,6 +118,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
+        double baconShooterMotorPowerChange = 1;
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double max;
@@ -187,10 +189,20 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             baconIntakeMotor.setPower(baconIntakeMotorPower);
 
             boolean baconShooterInput = gamepad2.right_bumper;
+            boolean baconShooterIncrease = gamepad2.dpad_up;
+            boolean baconShooterDecrease = gamepad2.dpad_down;
             double baconShooterMotorPower = 0;
+
+            //this is where we check for change with up dpad or down dpad
+            if (baconShooterIncrease == true && baconShooterMotorPowerChange < 0.99) {
+                baconShooterMotorPowerChange += 0.02;
+            } else if (baconShooterDecrease == true && baconShooterMotorPowerChange > 0.01) {
+                baconShooterMotorPowerChange -= 0.02;
+            }
+
             //If pressed, then track the power of BaconRB (1 or 0)
             if (baconShooterInput == true) {
-                baconShooterMotorPower = 1;
+                baconShooterMotorPower = baconShooterMotorPowerChange;
             } else {
                 baconShooterMotorPower = 0;
             }
@@ -220,6 +232,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             telemetry.addData("Intake ballintakething", "%4.2f" , baconIntakeMotorPower );
             telemetry.addData("Shoot ball thing", "%4.2f" , baconShooterMotorPower );
             telemetry.addData("Rotator power", "%4.2f" , baconRotatorPower );
+            telemetry.addData("Shooter power", "%4.2f" , baconShooterMotorPowerChange );
             telemetry.update();
+
         }
     }}
