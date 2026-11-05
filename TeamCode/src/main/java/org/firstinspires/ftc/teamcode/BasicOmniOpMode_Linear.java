@@ -137,6 +137,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
 
+
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
             double frontLeftPower  = axial + lateral + yaw;
@@ -156,7 +157,15 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 backLeftPower   /= max;
                 backRightPower  /= max;
             }
-
+            //this is a buttun to make it precise
+            boolean baconPrecisionMode= gamepad1.left_bumper;
+            if (baconPrecisionMode == true){
+                frontLeftPower  /= 2;
+                frontRightPower /= 2;
+                backLeftPower   /= 2;
+                backRightPower  /= 2;
+                // Hello Friendly code reader welcome to bacon Precision mode. its a checkpoint in your code reading. it is cool and prericise.
+            }
             // This is test code:
             //
             // Uncomment the following code to test your motor directions.
@@ -247,6 +256,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             telemetry.addData("Shooter power", "%4.2f" , baconShooterMotorPower );
             telemetry.addData("Shooter power adjustment", "%4.2f" , baconShooterMotorPowerChange );
             telemetry.addData("Rotator power", "%4.2f" , baconRotatorPower );
+            telemetry.addData("Precision mode exists! ", "%4.2f" , baconPrecisionMode );
             telemetry.update();
 
         }
