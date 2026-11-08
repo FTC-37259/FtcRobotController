@@ -81,6 +81,11 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
 
     private DcMotor baconShooterMotor = null;
     private CRServo baconRotatorServo= null;
+    private DcMotor baconRotatorMotor = null;
+
+
+    private double targetPollenPower = 0.70;
+    private double targetNectarPower = 0.92;
 
     @Override
     public void runOpMode() {
@@ -94,6 +99,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         baconIntakeMotor = hardwareMap.get(DcMotor.class,"bacon_front_intake" );
         baconShooterMotor = hardwareMap.get(DcMotor.class,"bacon_shooter");
         baconRotatorServo = hardwareMap.get(CRServo.class, "bacon_intake_servo");
+        baconRotatorMotor = hardwareMap.get(DcMotor.class,"bacon_spinthing_motor");
+
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -110,6 +117,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
         baconIntakeMotor.setDirection(DcMotor.Direction.REVERSE);
         baconShooterMotor.setDirection(DcMotor.Direction.FORWARD);
+        baconRotatorMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -117,6 +125,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
 
         waitForStart();
         runtime.reset();
+
+        double baconShooterMotorPowerChange = 0.0;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -126,6 +136,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
             double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
+
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -146,7 +157,15 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 backLeftPower   /= max;
                 backRightPower  /= max;
             }
-
+            //this is a buttun to make it precise
+            boolean baconPrecisionMode= gamepad1.left_bumper;
+            if (baconPrecisionMode == true){
+                frontLeftPower  /= 2;
+                frontRightPower /= 2;
+                backLeftPower   /= 2;
+                backRightPower  /= 2;
+                // Hello Friendly code reader welcome to bacon Precision mode. its a checkpoint in your code reading. it is cool and prericise.
+            }
             // This is test code:
             //
             // Uncomment the following code to test your motor directions.
@@ -172,8 +191,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
 
             //new section bacon_intake
             //raad state of bacon_lb
-            boolean baconIntakeInput = gamepad2.left_bumper;
-            float baconIntakeReverseInput = gamepad2.left_trigger;
+            boolean baconIntakeInput = gamepad2.right_bumper;
+            float baconIntakeReverseInput = gamepad2.right_trigger;
             double baconIntakeMotorPower = 0;
             //If pressed, then track the power of BaconLB (1 or 0)
             if (baconIntakeInput == true) {
@@ -186,11 +205,26 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             //Send to BaconInputMotor
             baconIntakeMotor.setPower(baconIntakeMotorPower);
 
-            boolean baconShooterInput = gamepad2.right_bumper;
+            boolean baconShooterInput = gamepad2.left_bumper;
+            float baconShooterTriggerInput = gamepad2.left_trigger;
+            boolean baconShooterIncrease = gamepad2.dpad_up;
+            boolean baconShooterDecrease = gamepad2.dpad_down;
             double baconShooterMotorPower = 0;
-            //If pressed, then track the power of BaconRB (1 or 0)
-            if (baconShooterInput == true) {
-                baconShooterMotorPower = 1;
+
+            //this is where we check for change with up dpad or down dpad
+            if (baconShooterIncrease == true && baconShooterMotorPowerChange < 0.5) {
+                baconShooterMotorPowerChange += 0.0001;
+            } else if (baconShooterDecrease == true && baconShooterMotorPowerChange < 0.5) {
+                baconShooterMotorPowerChange -= 0.0001;
+            }
+
+            // If trigger pressed, shoot with nectar power level
+            // If bumper pressed, shoot with pollen power level
+            //
+            if (baconShooterTriggerInput > 0.2) {
+                baconShooterMotorPower = targetNectarPower + baconShooterMotorPowerChange;
+            } else if (baconShooterInput == true) {
+                baconShooterMotorPower = targetPollenPower + baconShooterMotorPowerChange;
             } else {
                 baconShooterMotorPower = 0;
             }
@@ -210,16 +244,20 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 baconRotatorPower = 0;
             }
             //Send to BaconInputMotor
-            baconRotatorServo.setPower(baconRotatorPower);
-
+            // Servo commented out since switched to Motor
+            // baconRotatorServo.setPower(baconRotatorPower);
+            baconRotatorMotor.setPower(baconRotatorPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
             telemetry.addData("Intake ballintakething", "%4.2f" , baconIntakeMotorPower );
-            telemetry.addData("Shoot ball thing", "%4.2f" , baconShooterMotorPower );
+            telemetry.addData("Shooter power", "%4.2f" , baconShooterMotorPower );
+            telemetry.addData("Shooter power adjustment", "%4.2f" , baconShooterMotorPowerChange );
             telemetry.addData("Rotator power", "%4.2f" , baconRotatorPower );
+            telemetry.addData("Precision mode exists! ", "%4.2f" , baconPrecisionMode );
             telemetry.update();
+
         }
     }}
